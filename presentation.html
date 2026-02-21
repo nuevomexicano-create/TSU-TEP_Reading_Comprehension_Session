@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSU-TEP Reading Comprehension Review</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .slideshow { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    display: none;
+    width: 100%;
+    height: calc(100vh - 50px);
+    padding: 22px 55px 16px;
+    position: absolute;
+    top: 0; left: 0;
+    overflow: hidden;
+    flex-direction: column;
+    justify-content: flex-start;
+    animation: fadeIn 0.25s ease;
+  }
+  .slide.active { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* THEMES */
+  .theme-navy   { background: #0f2d5a; }
+  .theme-teal   { background: #0d4f4f; }
+  .theme-purple { background: #2d1b69; }
+  .theme-green  { background: #1a4a2e; }
+  .theme-orange { background: #5a2d0c; }
+  .theme-dark   { background: #1a1a2e; }
+  .theme-practice { background: #1a2e1a; }
+
+  /* TYPOGRAPHY */
+  h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 8px; line-height: 1.2; }
+  h2 { font-size: 1.65em; font-weight: 600; margin-bottom: 10px; line-height: 1.2; }
+  h3 { font-size: 1.05em; font-weight: 600; margin-bottom: 6px; color: #fbbf24; }
+  p  { font-size: 0.95em; line-height: 1.6; margin-bottom: 6px; color: #d1d5db; }
+  .subtitle { font-size: 1.15em; color: #93c5fd; margin-bottom: 4px; }
+  .note { font-size: 0.8em; color: #9ca3af; font-style: italic; margin-top: 3px; }
+
+  /* LAYOUT */
+  .two-col  { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .four-col { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+  .gap-sm   { margin-top: 8px; }
+  .gap-md   { margin-top: 14px; }
+
+  /* BOXES */
+  .highlight-box {
+    background: rgba(255,255,255,0.08);
+    border-left: 4px solid #fbbf24;
+    padding: 9px 16px;
+    border-radius: 0 6px 6px 0;
+    margin: 7px 0;
+  }
+  .card {
+    background: rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .card h3 { font-size: 0.97em; margin-bottom: 5px; }
+  .card p, .card li { font-size: 0.86em; }
+
+  .stat-box {
+    background: rgba(251,191,36,0.15);
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .stat-box .number { font-size: 1.9em; font-weight: 700; color: #fbbf24; }
+  .stat-box .label  { font-size: 0.78em; color: #d1d5db; margin-top: 2px; }
+
+  .tip {
+    background: rgba(59,130,246,0.15);
+    border: 1px solid #3b82f6;
+    border-radius: 6px;
+    padding: 7px 14px;
+    margin: 6px 0;
+    font-size: 0.88em;
+    color: #bfdbfe;
+  }
+  .tip strong { color: #93c5fd; }
+
+  /* LISTS */
+  ul, ol { padding-left: 16px; }
+  li { font-size: 0.9em; line-height: 1.6; color: #d1d5db; }
+  li strong { color: #fff; }
+
+  /* BADGE & DECORATIVE */
+  .badge {
+    display: inline-block;
+    background: #fbbf24;
+    color: #1a1a2e;
+    font-weight: 700;
+    padding: 2px 12px;
+    border-radius: 20px;
+    font-size: 0.78em;
+    margin-bottom: 8px;
+  }
+  .strategy-num {
+    font-size: 3em;
+    font-weight: 800;
+    color: rgba(251,191,36,0.2);
+    line-height: 1;
+    margin-bottom: -6px;
+  }
+  .divider { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 9px 0; }
+
+  .timer-bar {
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.79em;
+    color: #fbbf24;
+    display: inline-block;
+    border: 1px solid rgba(251,191,36,0.3);
+    margin-bottom: 8px;
+  }
+
+  /* AGENDA */
+  .agenda-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .agenda-time  { color: #fbbf24; font-weight: 600; min-width: 105px; font-size: 0.83em; }
+  .agenda-topic { color: #e5e7eb; font-size: 0.88em; }
+  .agenda-tag   { margin-left: auto; background: rgba(255,255,255,0.07); padding: 1px 8px; border-radius: 10px; font-size: 0.74em; color: #9ca3af; }
+
+  /* PASSAGE */
+  .passage {
+    background: #f9f5eb;
+    color: #1a1a1a;
+    border-radius: 8px;
+    padding: 11px 16px;
+    font-size: 0.86em;
+    line-height: 1.65;
+    border-left: 5px solid #fbbf24;
+  }
+  .passage strong { color: #0f2d5a; }
+  .passage em { font-style: normal; background: #fef3c7; padding: 0 2px; border-radius: 2px; }
+
+  /* QUESTIONS */
+  .question-box {
+    background: rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 7px 12px;
+    margin: 5px 0;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .question-box .qtext   { font-size: 0.9em; color: #e5e7eb; margin-bottom: 3px; font-weight: 500; }
+  .question-box .options { font-size: 0.83em; color: #9ca3af; line-height: 1.4; }
+  .question-box .strat   { font-size: 0.76em; color: #6b7280; margin-top: 2px; font-style: italic; }
+  .answer {
+    background: rgba(34,197,94,0.15);
+    border: 1px solid #22c55e;
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-top: 4px;
+    font-size: 0.83em;
+    color: #86efac;
+  }
+
+  /* ANSWER TABLE */
+  .ans-table { border-collapse: collapse; width: 100%; font-size: 0.84em; margin: 8px 0; }
+  .ans-table th { background: rgba(255,255,255,0.12); color: #fbbf24; padding: 6px 10px; text-align: left; }
+  .ans-table td { padding: 5px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); color: #d1d5db; vertical-align: top; }
+  .ans-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+  .ans-correct { color: #86efac; font-weight: 600; }
+
+  /* NAV */
+  #nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: rgba(0,0,0,0.65);
+    padding: 0 20px;
+    height: 50px;
+    backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    z-index: 100;
+  }
+  #nav button {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    padding: 5px 16px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 0.88em;
+    transition: background 0.2s;
+  }
+  #nav button:hover { background: rgba(255,255,255,0.22); }
+  #slide-counter { font-size: 0.82em; color: #9ca3af; min-width: 60px; text-align: center; }
+
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: #fbbf24;
+    transition: width 0.3s;
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<div class="slideshow">
+
+<!-- ===== SLIDE 1: TITLE ===== -->
+<div class="slide theme-navy active">
+  <div class="badge">TSU-TEP EXAM PREP</div>
+  <h1>Reading Comprehension<br>Review Session</h1>
+  <p class="subtitle">2-Hour Workshop &nbsp;|&nbsp; B1 CEFR Level</p>
+  <div class="divider"></div>
+  <p style="margin-top: 8px;">By the end of this session you will be able to:</p>
+  <ul style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+    <li>Apply <strong>5 key reading strategies</strong> to answer questions faster and more accurately</li>
+    <li>Identify <strong>question types</strong> and choose the right strategy for each</li>
+    <li>Manage your <strong>time effectively</strong> across the 60-minute reading section</li>
+    <li>Practice with <strong>TSU-TEP style passages and questions</strong></li>
+  </ul>
+</div>
+
+<!-- ===== SLIDE 2: AGENDA ===== -->
+<div class="slide theme-dark">
+  <h2>Session Agenda</h2>
+  <div style="margin-top: 6px;">
+    <div class="agenda-row"><span class="agenda-time">0:00 – 0:10</span><span class="agenda-topic">TSU-TEP Reading Section — The Facts</span><span class="agenda-tag">Overview</span></div>
+    <div class="agenda-row"><span class="agenda-time">0:10 – 0:22</span><span class="agenda-topic">Strategy 1: Skimming</span><span class="agenda-tag">Strategy</span></div>
+    <div class="agenda-row"><span class="agenda-time">0:22 – 0:34</span><span class="agenda-topic">Strategy 2: Scanning</span><span class="agenda-tag">Strategy</span></div>
+    <div class="agenda-row"><span class="agenda-time">0:34 – 0:45</span><span class="agenda-topic">Strategy 3: Vocabulary in Context</span><span class="agenda-tag">Strategy</span></div>
+    <div class="agenda-row"><span class="agenda-time">0:45 – 0:55</span><span class="agenda-topic">Strategy 4: Reading for Detail</span><span class="agenda-tag">Strategy</span></div>
+    <div class="agenda-row"><span class="agenda-time">0:55 – 1:05</span><span class="agenda-topic">Strategy 5: Making Inferences</span><span class="agenda-tag">Strategy</span></div>
+    <div class="agenda-row"><span class="agenda-time">1:05 – 1:15</span><span class="agenda-topic">Strategy Demo + Summary</span><span class="agenda-tag">Demo</span></div>
+    <div class="agenda-row"><span class="agenda-time">1:15 – 1:40</span><span class="agenda-topic">Full Practice — Short Passage</span><span class="agenda-tag">Practice</span></div>
+    <div class="agenda-row"><span class="agenda-time">1:40 – 2:00</span><span class="agenda-topic">Full Practice — Long Passage + Test Tips</span><span class="agenda-tag">Practice</span></div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 3: EXAM FACTS ===== -->
+<div class="slide theme-navy">
+  <div class="timer-bar">⏱ 0:00 – 0:10</div>
+  <h2>TSU-TEP Reading Section</h2>
+  <div class="four-col gap-sm">
+    <div class="stat-box"><div class="number">40</div><div class="label">Questions</div></div>
+    <div class="stat-box"><div class="number">60</div><div class="label">Minutes</div></div>
+    <div class="stat-box"><div class="number">6</div><div class="label">Passages</div></div>
+    <div class="stat-box"><div class="number">1.5</div><div class="label">Min / Question</div></div>
+  </div>
+  <div class="highlight-box gap-md">
+    <p><strong>Passages:</strong> 4 short (~150–200 words) + 2 long (~300–400 words)</p>
+  </div>
+  <div class="two-col gap-sm">
+    <div class="card">
+      <h3>Reading Strategy Questions</h3>
+      <ul>
+        <li>Main idea / purpose</li>
+        <li>Specific detail / fact</li>
+        <li>TRUE / NOT mentioned</li>
+        <li>Inference / implication</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Vocabulary Questions</h3>
+      <ul>
+        <li>Word meaning from context</li>
+        <li>Closest synonym</li>
+        <li>Reference words (it, they, this…)</li>
+        <li>Author's attitude / tone</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 4: TIME MANAGEMENT ===== -->
+<div class="slide theme-dark">
+  <h2>Time Is Your Biggest Challenge</h2>
+  <div class="highlight-box gap-sm">
+    <p><strong>60 minutes ÷ 40 questions = 1.5 minutes per question</strong></p>
+    <p>But you must also read each passage — so you need a plan.</p>
+  </div>
+  <div style="margin-top: 10px;">
+    <div class="agenda-row"><span class="agenda-time" style="min-width: 200px;">Short passage × 4</span><span class="agenda-topic">~6 min each — 2 min read + 4 min questions</span></div>
+    <div class="agenda-row"><span class="agenda-time" style="min-width: 200px;">Long passage × 2</span><span class="agenda-topic">~15 min each — 4 min read + 11 min questions</span></div>
+    <div class="agenda-row"><span class="agenda-time" style="min-width: 200px;">Total used</span><span class="agenda-topic">24 + 30 = 54 min — leaves 6 minutes to review</span></div>
+  </div>
+  <div class="tip gap-md">
+    <strong>Rule:</strong> Never spend more than 2 minutes on one question. Mark it, move on, come back at the end.
+  </div>
+  <div class="tip" style="margin-top: 6px;">
+    <strong>Checkpoint:</strong> At question 20, you should have at least 30 minutes remaining.
+  </div>
+</div>
+
+<!-- ===== SLIDE 5: STRATEGY 1 — SKIMMING ===== -->
+<div class="slide theme-teal">
+  <div class="timer-bar">⏱ 0:10 – 0:22</div>
+  <div class="strategy-num">01</div>
+  <h2>Skimming</h2>
+  <p class="subtitle" style="margin-bottom: 6px;">Read fast — get the big picture</p>
+  <div class="divider"></div>
+  <div class="two-col gap-sm">
+    <div>
+      <h3>What is it?</h3>
+      <p>Reading very quickly to understand the <strong>general topic and structure</strong> — without reading every word.</p>
+      <h3 style="margin-top: 12px;">Use it for:</h3>
+      <ul>
+        <li>The start of every passage (always)</li>
+        <li>"What is this text <strong>mainly about</strong>?"</li>
+        <li>"What is the <strong>purpose</strong> of this text?"</li>
+        <li>"What does the author <strong>discuss</strong>?"</li>
+      </ul>
+    </div>
+    <div>
+      <h3>How to skim:</h3>
+      <ol style="display: flex; flex-direction: column; gap: 5px;">
+        <li>Read the <strong>title</strong> (if there is one)</li>
+        <li>Read the <strong>first sentence</strong> of each paragraph</li>
+        <li>Read the <strong>last sentence</strong> of the whole text</li>
+        <li>Note any <strong>headings, bold words, or lists</strong></li>
+        <li>Time allowed: <strong>30–60 seconds maximum</strong></li>
+      </ol>
+      <div class="tip" style="margin-top: 10px;">
+        <strong>Do NOT</strong> read every sentence — you will run out of time.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 6: STRATEGY 2 — SCANNING ===== -->
+<div class="slide theme-purple">
+  <div class="timer-bar">⏱ 0:22 – 0:34</div>
+  <div class="strategy-num">02</div>
+  <h2>Scanning</h2>
+  <p class="subtitle" style="margin-bottom: 6px;">Search fast — find specific information</p>
+  <div class="divider"></div>
+  <div class="two-col gap-sm">
+    <div>
+      <h3>What is it?</h3>
+      <p>Moving your eyes quickly over the text to find a <strong>specific piece of information</strong> — a number, name, date, or keyword.</p>
+      <h3 style="margin-top: 12px;">Use it for:</h3>
+      <ul>
+        <li>"According to the passage…" questions</li>
+        <li>Questions with numbers, prices, or dates</li>
+        <li>Questions mentioning a specific name or place</li>
+      </ul>
+    </div>
+    <div>
+      <h3>How to scan:</h3>
+      <ol style="display: flex; flex-direction: column; gap: 5px;">
+        <li><strong>Read the question</strong> first</li>
+        <li>Pick the <strong>key word</strong> from the question</li>
+        <li>Move your eyes quickly down the passage — look for that word (or a synonym)</li>
+        <li>When you find it — <strong>stop and read that sentence carefully</strong></li>
+        <li>Select your answer</li>
+      </ol>
+      <div class="tip" style="margin-top: 10px;">
+        The answer in the text is often a <strong>paraphrase</strong> of the question — not the exact same words.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 7: STRATEGY 3 — VOCABULARY ===== -->
+<div class="slide theme-orange">
+  <div class="timer-bar">⏱ 0:34 – 0:45</div>
+  <div class="strategy-num">03</div>
+  <h2>Vocabulary in Context</h2>
+  <p class="subtitle" style="margin-bottom: 6px;">Use clues from the text to guess meaning</p>
+  <div class="divider"></div>
+  <div class="two-col gap-sm">
+    <div>
+      <h3>What is it?</h3>
+      <p>Understanding an unknown word by using the <strong>surrounding sentences</strong> as clues — no dictionary needed.</p>
+      <h3 style="margin-top: 12px;">Question looks like:</h3>
+      <ul>
+        <li>"The word <em>X</em> is closest in meaning to…"</li>
+        <li>"Which word best replaces <em>X</em>?"</li>
+        <li>"What does <em>X</em> refer to in line…?"</li>
+      </ul>
+    </div>
+    <div>
+      <h3>4 types of context clues:</h3>
+      <ol style="display: flex; flex-direction: column; gap: 6px;">
+        <li><strong>Definition</strong> — sentence explains the word<br><span class="note">"Nematocysts, or stinging cells, fire venom…"</span></li>
+        <li><strong>Synonym</strong> — similar word is used nearby<br><span class="note">"huge and enormous waves…"</span></li>
+        <li><strong>Antonym</strong> — opposite word is nearby<br><span class="note">"unlike the safe jellyfish, the box jellyfish…"</span></li>
+        <li><strong>Logic</strong> — read before AND after the word</li>
+      </ol>
+      <div class="tip" style="margin-top: 8px;">
+        Try substituting each answer choice — which one keeps the sentence meaning intact?
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 8: STRATEGY 4 — DETAIL ===== -->
+<div class="slide theme-green">
+  <div class="timer-bar">⏱ 0:45 – 0:55</div>
+  <div class="strategy-num">04</div>
+  <h2>Reading for Detail</h2>
+  <p class="subtitle" style="margin-bottom: 6px;">Find the exact answer — slow down and read carefully</p>
+  <div class="divider"></div>
+  <div class="two-col gap-sm">
+    <div>
+      <h3>What is it?</h3>
+      <p>Carefully reading one <strong>specific section</strong> of the passage to find an exact fact, reason, or explanation.</p>
+      <h3 style="margin-top: 12px;">Use it for:</h3>
+      <ul>
+        <li>"Which of the following is <strong>TRUE</strong>?"</li>
+        <li>"Which is <strong>NOT mentioned</strong>?"</li>
+        <li>"According to the passage, why…?"</li>
+        <li>"The author states that…"</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Steps:</h3>
+      <ol style="display: flex; flex-direction: column; gap: 5px;">
+        <li>Read the question carefully</li>
+        <li>Scan for the key word location in the passage</li>
+        <li>Read <strong>that sentence + the one before and after</strong></li>
+        <li>Match the answer to what the passage <em>actually says</em></li>
+        <li>Eliminate options that mix facts from different parts</li>
+      </ol>
+      <div class="tip" style="margin-top: 10px;">
+        <strong>Warning:</strong> Wrong options often use true facts from the passage combined in a false way.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 9: STRATEGY 5 — INFERENCE ===== -->
+<div class="slide theme-navy">
+  <div class="timer-bar">⏱ 0:55 – 1:05</div>
+  <div class="strategy-num">05</div>
+  <h2>Making Inferences</h2>
+  <p class="subtitle" style="margin-bottom: 6px;">Understand what is suggested — not directly stated</p>
+  <div class="divider"></div>
+  <div class="two-col gap-sm">
+    <div>
+      <h3>What is it?</h3>
+      <p>The answer is <strong>not written in the text</strong>. You must read between the lines and draw a logical conclusion.</p>
+      <h3 style="margin-top: 12px;">Use it for:</h3>
+      <ul>
+        <li>"It can be <strong>inferred</strong> that…"</li>
+        <li>"The author <strong>implies</strong> that…"</li>
+        <li>"What is <strong>probably true</strong> about…?"</li>
+        <li>"Why <strong>most likely</strong> did…?"</li>
+      </ul>
+    </div>
+    <div>
+      <h3>How to answer:</h3>
+      <ol style="display: flex; flex-direction: column; gap: 5px;">
+        <li>Find the relevant part of the passage</li>
+        <li>Ask yourself: <em>What does this suggest?</em></li>
+        <li>The correct answer must be <strong>supported by the text</strong></li>
+        <li>Eliminate options that are directly stated (inference = not stated)</li>
+        <li>Eliminate options that go too far beyond the text</li>
+      </ol>
+      <div class="tip" style="margin-top: 10px;">
+        Inference ≠ common sense. It must be logically supported by <strong>something in the passage</strong>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 10: STRATEGY DEMO ===== -->
+<div class="slide theme-dark">
+  <div class="timer-bar">⏱ 1:05 – 1:15</div>
+  <h2>Quick Demo — All 3 Strategies</h2>
+  <div class="two-col gap-sm" style="align-items: start;">
+    <div>
+      <p class="note" style="margin-bottom: 5px;">Skim this passage in 30 seconds:</p>
+      <div class="passage">
+        <strong>SUNRISE BAKERY — GRAND OPENING</strong><br><br>
+        Sunrise Bakery is pleased to open its new branch at 45 Niphat Uthit Road, Hat Yai. We offer freshly baked breads, cakes, and pastries using local ingredients. Our <em>signature</em> coconut bread and mango cheesecake are already customer favourites. The bakery is open Monday to Saturday, 7:00 AM to 8:00 PM. The first 50 customers each day receive a complimentary coffee. We look forward to welcoming you this weekend!
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div class="question-box">
+        <p class="qtext">1. What is the main purpose of this text?</p>
+        <p class="options">A) To give baking advice &nbsp; B) To advertise a new bakery &nbsp; C) To describe local food &nbsp; D) To announce a competition</p>
+        <p class="strat">Strategy: Skimming</p>
+        <div class="answer">✓ B — The whole text promotes Sunrise Bakery's new branch.</div>
+      </div>
+      <div class="question-box">
+        <p class="qtext">2. What time does the bakery open each day?</p>
+        <p class="options">A) 6:00 AM &nbsp; B) 7:00 AM &nbsp; C) 8:00 AM &nbsp; D) 9:00 AM</p>
+        <p class="strat">Strategy: Scanning — scan for the time</p>
+        <div class="answer">✓ B — "open Monday to Saturday, 7:00 AM to 8:00 PM"</div>
+      </div>
+      <div class="question-box">
+        <p class="qtext">3. The word <em>signature</em> is closest in meaning to:</p>
+        <p class="options">A) most well-known &nbsp; B) cheapest &nbsp; C) newest &nbsp; D) smallest</p>
+        <p class="strat">Strategy: Vocabulary — clue: "already customer favourites"</p>
+        <div class="answer">✓ A — "signature" = most well-known / most distinctive</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 11: STRATEGY SUMMARY ===== -->
+<div class="slide theme-dark">
+  <h2>Strategy Summary — Quick Reference</h2>
+  <div style="display: flex; flex-direction: column; gap: 7px; margin-top: 10px;">
+    <div class="card" style="display: flex; align-items: center; gap: 16px; padding: 9px 16px;">
+      <div style="color: #fbbf24; font-weight: 700; font-size: 1.05em; min-width: 38px;">01</div>
+      <div><strong style="color: #fff;">Skimming</strong> — Read fast for main idea / purpose (30–60 seconds per passage)</div>
+    </div>
+    <div class="card" style="display: flex; align-items: center; gap: 16px; padding: 9px 16px;">
+      <div style="color: #fbbf24; font-weight: 700; font-size: 1.05em; min-width: 38px;">02</div>
+      <div><strong style="color: #fff;">Scanning</strong> — Search for specific words, numbers, names, or dates</div>
+    </div>
+    <div class="card" style="display: flex; align-items: center; gap: 16px; padding: 9px 16px;">
+      <div style="color: #fbbf24; font-weight: 700; font-size: 1.05em; min-width: 38px;">03</div>
+      <div><strong style="color: #fff;">Vocabulary in Context</strong> — Use surrounding words and logic to guess word meaning</div>
+    </div>
+    <div class="card" style="display: flex; align-items: center; gap: 16px; padding: 9px 16px;">
+      <div style="color: #fbbf24; font-weight: 700; font-size: 1.05em; min-width: 38px;">04</div>
+      <div><strong style="color: #fff;">Reading for Detail</strong> — Slow, careful reading of one section to find an exact fact</div>
+    </div>
+    <div class="card" style="display: flex; align-items: center; gap: 16px; padding: 9px 16px;">
+      <div style="color: #fbbf24; font-weight: 700; font-size: 1.05em; min-width: 38px;">05</div>
+      <div><strong style="color: #fff;">Making Inferences</strong> — Understand what is suggested but not directly written</div>
+    </div>
+  </div>
+  <div class="tip" style="margin-top: 10px;">
+    Most passages require <strong>multiple strategies</strong> — use a different one for each question type.
+  </div>
+</div>
+
+<!-- ===== SLIDE 12: PRACTICE 1 INTRO ===== -->
+<div class="slide theme-practice">
+  <div class="timer-bar">⏱ 1:15 – 1:40</div>
+  <div class="badge">PRACTICE — Short Passage</div>
+  <h2>Full Practice: Short Passage</h2>
+  <p class="subtitle">Your turn — apply the strategies</p>
+  <div class="divider"></div>
+  <div class="highlight-box gap-sm">
+    <p><strong>Task:</strong> Read the passage on the next slide, then answer 5 questions. Write which strategy you used for each question.</p>
+  </div>
+  <div class="two-col gap-md">
+    <div class="card">
+      <h3>Before you read:</h3>
+      <ol style="display: flex; flex-direction: column; gap: 4px;">
+        <li>Read all 5 questions first <span class="note">(30 seconds)</span></li>
+        <li>Skim the passage <span class="note">(45 seconds)</span></li>
+        <li>Answer each question using the right strategy</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Time target:</h3>
+      <ul style="display: flex; flex-direction: column; gap: 3px;">
+        <li>Read questions: 30 sec</li>
+        <li>Skim passage: 45 sec</li>
+        <li>5 questions: ~8 minutes</li>
+        <li><strong>Total: ~9–10 minutes</strong></li>
+      </ul>
+    </div>
+  </div>
+  <div class="tip gap-md">
+    The passage is a <strong>notice / announcement</strong> — a common TSU-TEP short passage type.
+  </div>
+</div>
+
+<!-- ===== SLIDE 13: PRACTICE 1 PASSAGE ===== -->
+<div class="slide theme-practice">
+  <p class="note" style="margin-bottom: 6px;">Read the questions first, then skim this passage before answering.</p>
+  <div class="passage">
+    <strong>CENTRAL COMMUNITY LIBRARY — DIGITAL MEMBERSHIP PROGRAMME</strong><br><br>
+    The Central Community Library is pleased to announce the launch of its new digital membership programme. From the 1st of April, all registered members will have free access to over 40,000 e-books, digital newspapers, and online magazines through the library's ReadNow app, available on any smartphone or tablet.<br><br>
+    Digital membership is free of charge for students currently <em>enrolled</em> at a local school or university. Non-student adults may join for an annual fee of 150 baht. Each member may borrow up to three digital items at one time, and each loan period lasts 21 days. Items may be renewed once online, provided no other member has placed a reservation.<br><br>
+    To help members get started, the library will hold free IT support workshops every Tuesday evening from 6:00 to 7:30 PM. Sessions are limited to 20 participants, so <em>advance</em> registration is required. For more details, visit us at 12 Phetkasem Road or call 074-333-222.
+  </div>
+</div>
+
+<!-- ===== SLIDE 14: PRACTICE 1 QUESTIONS 1–3 ===== -->
+<div class="slide theme-practice">
+  <h2>Practice 1 — Questions 1–3</h2>
+  <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+    <div class="question-box">
+      <p class="qtext"><strong>1.</strong> What is the main purpose of this notice?</p>
+      <p class="options">A) To sell e-books to library members &nbsp;&nbsp; B) To inform residents about a new digital library service &nbsp;&nbsp; C) To explain how smartphones work &nbsp;&nbsp; D) To announce new library opening hours</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+    <div class="question-box">
+      <p class="qtext"><strong>2.</strong> How long does each digital borrowing period last?</p>
+      <p class="options">A) 3 days &nbsp;&nbsp; B) 7 days &nbsp;&nbsp; C) 14 days &nbsp;&nbsp; D) 21 days</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+    <div class="question-box">
+      <p class="qtext"><strong>3.</strong> The word <em>enrolled</em> in paragraph 2 is closest in meaning to:</p>
+      <p class="options">A) Graduated &nbsp;&nbsp; B) Currently studying at &nbsp;&nbsp; C) Working at &nbsp;&nbsp; D) Visiting</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 15: PRACTICE 1 QUESTIONS 4–5 ===== -->
+<div class="slide theme-practice">
+  <h2>Practice 1 — Questions 4–5</h2>
+  <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+    <div class="question-box">
+      <p class="qtext"><strong>4.</strong> Which of the following statements is TRUE according to the passage?</p>
+      <p class="options">A) All library members must pay an annual fee &nbsp;&nbsp; B) Members can borrow up to five digital items at a time &nbsp;&nbsp; C) Student membership is available free of charge &nbsp;&nbsp; D) IT workshops are held every Monday morning</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+    <div class="question-box">
+      <p class="qtext"><strong>5.</strong> It can be inferred that the library offers IT workshops because:</p>
+      <p class="options">A) The ReadNow app has not been released yet &nbsp;&nbsp; B) Some members may find digital technology difficult to use &nbsp;&nbsp; C) All library members prefer reading printed books &nbsp;&nbsp; D) The library is trying to sell new smartphones</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+  </div>
+  <div class="tip" style="margin-top: 14px;">
+    The word <em>advance</em> in paragraph 3 — what does it mean in context? (Bonus vocabulary question)
+  </div>
+</div>
+
+<!-- ===== SLIDE 16: PRACTICE 1 ANSWERS ===== -->
+<div class="slide theme-practice">
+  <h2>Practice 1 — Answer Key</h2>
+  <table class="ans-table" style="margin-top: 10px;">
+    <tr>
+      <th>Q</th><th>Answer</th><th>Strategy</th><th>Explanation</th>
+    </tr>
+    <tr>
+      <td>1</td><td class="ans-correct">B</td><td>Skimming</td><td>The entire text promotes a new digital membership service — stated in the title and paragraph 1.</td>
+    </tr>
+    <tr>
+      <td>2</td><td class="ans-correct">D — 21 days</td><td>Scanning</td><td>Scan for "21" → "each loan period lasts 21 days."</td>
+    </tr>
+    <tr>
+      <td>3</td><td class="ans-correct">B — Currently studying at</td><td>Vocabulary</td><td>Context: students "enrolled at a local school or university" = currently studying there.</td>
+    </tr>
+    <tr>
+      <td>4</td><td class="ans-correct">C — Student membership is free</td><td>Reading for Detail</td><td>"Digital membership is free of charge for students currently enrolled…" A, B, D are all contradicted by the text.</td>
+    </tr>
+    <tr>
+      <td>5</td><td class="ans-correct">B — Some members may find digital technology difficult</td><td>Inference</td><td>IT "support" workshops to help members "get started" implies some people need help with technology.</td>
+    </tr>
+  </table>
+  <div class="note" style="margin-top: 8px;">Bonus: <em>advance</em> = before / ahead of time ("advance registration" = register before the session)</div>
+</div>
+
+<!-- ===== SLIDE 17: PRACTICE 2 INTRO ===== -->
+<div class="slide theme-practice">
+  <div class="timer-bar">⏱ 1:40 – 2:00</div>
+  <div class="badge">PRACTICE — Long Passage</div>
+  <h2>Full Practice: Long Passage</h2>
+  <p class="subtitle">The passage is split across two slides — read both before answering</p>
+  <div class="divider"></div>
+  <div class="highlight-box gap-sm">
+    <p><strong>Strategy for long passages:</strong> Read ALL the questions first, then skim, then scan + read for detail as needed.</p>
+  </div>
+  <div class="two-col gap-md">
+    <div class="card">
+      <h3>Time target:</h3>
+      <ul style="display: flex; flex-direction: column; gap: 3px;">
+        <li>Read questions: 1 min</li>
+        <li>Skim passage: 1 min</li>
+        <li>6 questions: ~13 minutes</li>
+        <li><strong>Total: ~15 minutes</strong></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>This passage type:</h3>
+      <ul style="display: flex; flex-direction: column; gap: 3px;">
+        <li>Science / nature informational text</li>
+        <li>4 paragraphs</li>
+        <li>All 5 question types tested</li>
+        <li>Common in TSU-TEP long passages</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 18: PRACTICE 2 PASSAGE PART 1 ===== -->
+<div class="slide theme-practice">
+  <p class="note" style="margin-bottom: 6px;">Passage — Part 1 of 2 (paragraphs 1–2). Continue reading on the next slide.</p>
+  <div class="passage">
+    <strong>THE HONEY BEE — MORE THAN JUST HONEY</strong><br><br>
+    The honey bee is one of the most important insects on Earth. Although many people associate bees mainly with honey, their role as pollinators is far more significant. As bees travel from flower to flower collecting nectar, they transfer pollen, which allows plants to reproduce. Scientists estimate that bees are responsible for pollinating approximately one third of all the food that humans consume, including fruits, vegetables, and nuts.<br><br>
+    A single honey bee colony may contain up to 60,000 individual bees, all working together with remarkable <em>efficiency</em>. Each colony is led by a queen, whose only purpose is to lay eggs. Worker bees, which are all female, are responsible for collecting food, building and maintaining the hive, and defending the colony against threats. Male bees, known as <em>drones</em>, exist for just one purpose — to mate with a new queen.
+  </div>
+</div>
+
+<!-- ===== SLIDE 19: PRACTICE 2 PASSAGE PART 2 ===== -->
+<div class="slide theme-practice">
+  <p class="note" style="margin-bottom: 6px;">Passage — Part 2 of 2 (paragraphs 3–4). Now read the questions and answer.</p>
+  <div class="passage">
+    <strong>THE HONEY BEE — MORE THAN JUST HONEY</strong> <span style="font-size: 0.8em; color: #666;">(continued)</span><br><br>
+    In recent decades, bee populations worldwide have been declining at a <em>worrying</em> rate. A condition known as Colony Collapse Disorder has caused worker bees to disappear suddenly from their hives, leaving behind a queen and food stores but no workers. Researchers believe that the widespread use of pesticides, loss of natural habitats, and the spread of disease are all contributing to this problem.<br><br>
+    The consequences of losing bees could be severe. Without bees to pollinate crops, food production would fall considerably and prices for many everyday foods would rise. Governments and conservation organisations are encouraging people to plant bee-friendly flowers, reduce their use of chemical pesticides, and support local beekeepers. Protecting bees ultimately means protecting our own food supply.
+  </div>
+</div>
+
+<!-- ===== SLIDE 20: PRACTICE 2 QUESTIONS 1–3 ===== -->
+<div class="slide theme-practice">
+  <h2>Practice 2 — Questions 1–3</h2>
+  <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+    <div class="question-box">
+      <p class="qtext"><strong>1.</strong> What is the main topic of this passage?</p>
+      <p class="options">A) How honey is produced &nbsp;&nbsp; B) The importance of bees and the threats they face &nbsp;&nbsp; C) Different types of insects around the world &nbsp;&nbsp; D) Modern farming and pesticide use</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+    <div class="question-box">
+      <p class="qtext"><strong>2.</strong> How many bees can a single colony contain?</p>
+      <p class="options">A) Up to 10,000 &nbsp;&nbsp; B) Up to 30,000 &nbsp;&nbsp; C) Up to 60,000 &nbsp;&nbsp; D) Up to 100,000</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+    <div class="question-box">
+      <p class="qtext"><strong>3.</strong> The word <em>worrying</em> in paragraph 3 is closest in meaning to:</p>
+      <p class="options">A) Surprising &nbsp;&nbsp; B) Gradual &nbsp;&nbsp; C) Alarming &nbsp;&nbsp; D) Familiar</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 21: PRACTICE 2 QUESTIONS 4–6 ===== -->
+<div class="slide theme-practice">
+  <h2>Practice 2 — Questions 4–6</h2>
+  <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+    <div class="question-box">
+      <p class="qtext"><strong>4.</strong> According to the passage, what is the role of drone bees?</p>
+      <p class="options">A) To gather nectar from flowers &nbsp;&nbsp; B) To lay eggs for the colony &nbsp;&nbsp; C) To build and maintain the hive &nbsp;&nbsp; D) To mate with a new queen</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+    <div class="question-box">
+      <p class="qtext"><strong>5.</strong> Which of the following is TRUE according to the passage?</p>
+      <p class="options">A) Drones are responsible for protecting the hive &nbsp;&nbsp; B) Bees pollinate about one third of human food &nbsp;&nbsp; C) Colony Collapse Disorder has been fully explained by scientists &nbsp;&nbsp; D) Only female bees collect nectar and build the hive</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+    <div class="question-box">
+      <p class="qtext"><strong>6.</strong> What can be inferred from the final paragraph?</p>
+      <p class="options">A) Bees have already disappeared from many countries &nbsp;&nbsp; B) Ordinary people can take actions to help protect bees &nbsp;&nbsp; C) Food prices are currently rising because of bee decline &nbsp;&nbsp; D) Governments have already found a solution to Colony Collapse Disorder</p>
+      <p class="strat">Strategy: ___________________</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 22: PRACTICE 2 ANSWERS ===== -->
+<div class="slide theme-practice">
+  <h2>Practice 2 — Answer Key</h2>
+  <table class="ans-table" style="margin-top: 10px;">
+    <tr>
+      <th>Q</th><th>Answer</th><th>Strategy</th><th>Explanation</th>
+    </tr>
+    <tr>
+      <td>1</td><td class="ans-correct">B</td><td>Skimming</td><td>All 4 paragraphs cover bee importance + threats — neither just honey nor just farming.</td>
+    </tr>
+    <tr>
+      <td>2</td><td class="ans-correct">C — 60,000</td><td>Scanning</td><td>Scan for the number → "colony may contain up to 60,000 individual bees."</td>
+    </tr>
+    <tr>
+      <td>3</td><td class="ans-correct">C — Alarming</td><td>Vocabulary</td><td>Context: populations "declining" → the rate is alarming = worrying / concerning.</td>
+    </tr>
+    <tr>
+      <td>4</td><td class="ans-correct">D — To mate with a new queen</td><td>Reading for Detail</td><td>"Male bees… exist for just one purpose — to mate with a new queen."</td>
+    </tr>
+    <tr>
+      <td>5</td><td class="ans-correct">B — Bees pollinate ~1/3 of human food</td><td>Reading for Detail</td><td>Paragraph 1: "responsible for pollinating approximately one third of all the food…" Options A, C, D are all contradicted or not supported.</td>
+    </tr>
+    <tr>
+      <td>6</td><td class="ans-correct">B — Ordinary people can help</td><td>Inference</td><td>Paragraph 4 lists actions individuals can take (plant flowers, reduce pesticides) → implies individuals can make a difference.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ===== SLIDE 23: TEST DAY TIPS ===== -->
+<div class="slide theme-navy">
+  <h2>Test Day — 10 Essential Rules</h2>
+  <div class="two-col" style="margin-top: 10px; gap: 10px;">
+    <div style="display: flex; flex-direction: column; gap: 7px;">
+      <div class="card" style="padding: 8px 14px; border-left: 3px solid #fbbf24;"><p><strong>1.</strong> Read ALL questions before reading the passage</p></div>
+      <div class="card" style="padding: 8px 14px; border-left: 3px solid #fbbf24;"><p><strong>2.</strong> Skim every passage first — always (45–60 seconds)</p></div>
+      <div class="card" style="padding: 8px 14px; border-left: 3px solid #fbbf24;"><p><strong>3.</strong> The answer is always in the text — don't use outside knowledge</p></div>
+      <div class="card" style="padding: 8px 14px; border-left: 3px solid #fbbf24;"><p><strong>4.</strong> Never leave a blank — wrong answers do not lose marks</p></div>
+      <div class="card" style="padding: 8px 14px; border-left: 3px solid #fbbf24;"><p><strong>5.</strong> Move on after 2 minutes — mark it, return later</p></div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 7px;">
+      <div class="card" style="padding: 8px 14px; border-left: 3px solid #93c5fd;"><p><strong>6.</strong> Eliminate 2 wrong answers first, then choose between 2</p></div>
+      <div class="card" style="padding: 8px 14px; border-left: 3px solid #93c5fd;"><p><strong>7.</strong> For "NOT mentioned" — check every option against the text</p></div>
+      <div class="card" style="padding: 8px 14px; border-left: 3px solid #93c5fd;"><p><strong>8.</strong> Watch for distractors — true facts that don't answer the question</p></div>
+      <div class="card" style="padding: 8px 14px; border-left: 3px solid #93c5fd;"><p><strong>9.</strong> Inference must be supported by the text — not just "probably true"</p></div>
+      <div class="card" style="padding: 8px 14px; border-left: 3px solid #93c5fd;"><p><strong>10.</strong> Check the time at question 20 — you should have 30 minutes left</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 24: WRAP UP ===== -->
+<div class="slide theme-navy">
+  <h2>What You've Learned Today</h2>
+  <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+    <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 9px 16px;">
+      <div style="color: #22c55e; font-size: 1.3em; min-width: 24px;">✓</div>
+      <p>TSU-TEP Reading: <strong>40 questions, 60 minutes, 6 passages (4 short + 2 long)</strong></p>
+    </div>
+    <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 9px 16px;">
+      <div style="color: #22c55e; font-size: 1.3em; min-width: 24px;">✓</div>
+      <p><strong>5 strategies:</strong> Skim → Scan → Vocabulary in Context → Detail → Inference</p>
+    </div>
+    <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 9px 16px;">
+      <div style="color: #22c55e; font-size: 1.3em; min-width: 24px;">✓</div>
+      <p>Always <strong>read questions first</strong> — then choose the right strategy for each question</p>
+    </div>
+    <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 9px 16px;">
+      <div style="color: #22c55e; font-size: 1.3em; min-width: 24px;">✓</div>
+      <p><strong>Time plan:</strong> ~6 min per short passage, ~15 min per long passage</p>
+    </div>
+    <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 9px 16px;">
+      <div style="color: #22c55e; font-size: 1.3em; min-width: 24px;">✓</div>
+      <p>Never leave a blank — and <strong>move on</strong> after 2 minutes on any single question</p>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top: 12px; text-align: center;">
+    <p style="font-size: 1.05em; color: #fff;">Good luck on the TSU-TEP!</p>
+    <p class="note">← → arrow keys or buttons to navigate &nbsp;|&nbsp; Press End to jump to last slide</p>
+  </div>
+</div>
+
+</div><!-- end slideshow -->
+
+<!-- NAVIGATION -->
+<div id="nav">
+  <button onclick="changeSlide(-1)">← Prev</button>
+  <span id="slide-counter">1 / 24</span>
+  <button onclick="changeSlide(1)">Next →</button>
+</div>
+
+<script>
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = (n + total) % total;
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                     { e.preventDefault(); changeSlide(-1); }
+    if (e.key === 'Home') showSlide(0);
+    if (e.key === 'End')  showSlide(total - 1);
+  });
+
+  showSlide(0);
+</script>
+</body>
+</html>
